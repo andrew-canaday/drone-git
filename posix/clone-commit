@@ -13,5 +13,16 @@ fi
 set -e
 set -x
 
-git fetch ${FLAGS} origin +refs/heads/${DRONE_COMMIT_BRANCH}:
-git checkout ${DRONE_COMMIT_SHA} -b ${DRONE_COMMIT_BRANCH}
+if [ -n "${PLUGIN_FETCHREFS}" ]; then
+    for ref_name in $( echo "${PLUGIN_FETCHREFS}" | tr ',' ' ' ) ; do
+        git fetch ${FLAGS} origin +${ref_name}:
+    done
+    git checkout ${DRONE_COMMIT_SHA} \
+        -b ${PLUGIN_CHECKOUTBRANCH:-"${DRONE_COMMIT_BRANCH}"}
+else
+    git fetch ${FLAGS} origin +refs/heads/${DRONE_COMMIT_BRANCH}:
+    git checkout ${DRONE_COMMIT_SHA} -b ${DRONE_COMMIT_BRANCH}
+fi
+
+
+
